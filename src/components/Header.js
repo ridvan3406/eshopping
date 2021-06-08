@@ -1,19 +1,7 @@
 import { createMedia } from '@artsy/fresnel'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import {
-  Button,
-  Container,
-  Divider,
-  Grid,
-  Header,
-  Icon,
-  Image,
-  List,
-  Menu,
-  Segment,
-  Sidebar,
-  Visibility,
+import {Button, Container, Divider, Grid, Header, Icon, Image, List, Menu, Segment, Sidebar, Visibility,
 } from 'semantic-ui-react'
 
 const HomepageHeading = ({ mobile }) => (

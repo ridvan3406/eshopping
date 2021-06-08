@@ -1,23 +1,15 @@
 import { createMedia } from '@artsy/fresnel'
 import PropTypes from 'prop-types'
-import React from 'react'
-import {
-  Button,
-  Container,
-  Divider,
-  Grid,
-  Header,
-  Icon,
-  Image,
-  List,
-  Menu,
-  Segment,
-  Sidebar,
-  Visibility,
+import React, {useState, useEffect} from 'react'
+import {Button,Container,Divider,Grid,Header,Icon,Image,List,Menu,Segment,Sidebar,Visibility,
 } from 'semantic-ui-react'
 import Footer from './components/Footer'
 import DesktopContainer from './components/Menu'
 import MobileContainer from './components/ResponisveMobile'
+import { BrowserRouter as Router, Switch} from 'react-router-dom'
+import Cart from './components/Cart/Cart'
+import {commerce } from './lib/commence'
+import Products from './components/Products/Products'
 
 
 const { MediaContextProvider, Media } = createMedia({
@@ -55,11 +47,70 @@ ResponsiveContainer.propTypes = {
 }
 
 
-const App = () => (
+const App = () => {
+  const [products, setProducts] = useState([])
+  const [cart, setCart ] = useState({})
+
+    const fetchProducts = async () => {
+      const {data} = await commerce.products.list();
+      
+      setProducts(data)
+  }
+
+    const fetchCart = async () => { 
+      setCart(await commerce.cart.retrieve())
+  }
+
+    const handleUpdateCartQty = async (productId, quantity) => {
+      const {cart} = await commerce.cart.update(productId, {quantity})
+
+      setCart(cart)
+  }
+
+  const handleAddToCart = async (productId, quanitity) => {
+    const {cart}= await commerce.cart.add(productId, quanitity);
+
+    setCart(cart)
+  }
+
+  const handleRemoveFromCart = async (productId) => {
+    const {cart} = await commerce.cart.remove(productId);
+
+    setCart(cart)
+  }
+
+  const handleEmptyCart = async () => {
+    const {cart} = await commerce.cart.empty();
+
+    setCart(cart)
+  } 
+
+  useEffect(()=>{
+    fetchProducts();
+    fetchCart()
+  }, [])
+
+return (
   <div>
-    <Menu/>
-    <ResponsiveContainer>
-    <Segment style={{ padding: '8em 0em' }} vertical>
+  
+    <DesktopContainer totalItems={cart.total_items}/>
+
+    <Switch >
+      <Router exact path="/products">
+          <Products products={products} onAddToCart={handleAddToCart}/>
+      </Router>
+      <Router exact path="/cart">
+          <Cart 
+              cart={cart}
+              handleUpdateCartQty={handleUpdateCartQty}
+              handleRemoveFromCart={handleRemoveFromCart}
+              handleEmptyCart={handleEmptyCart}
+          />
+      </Router>
+    </Switch>
+
+    {/*<ResponsiveContainer>
+      <Segment style={{ padding: '8em 0em' }} vertical>
       <Grid container stackable verticalAlign='middle'>
         <Grid.Row>
           <Grid.Column width={8}>
@@ -127,12 +178,11 @@ const App = () => (
         </Button>
       </Container>
     </Segment>
-
-    
-  </ResponsiveContainer>
+  </ResponsiveContainer>*/}
   <Footer/>
   </div>
   
 )
+}
 
 export default App
